@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tic Tac Toe vs Computer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f8f8f8;
+      margin-top: 50px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 5px;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border: 2px solid #333;
+      font-size: 36px;
+      text-align: center;
+      line-height: 100px;
+      cursor: pointer;
+    }
+    .cell:hover {
+      background: #e0e0e0;
+    }
+    #status {
+      margin-top: 15px;
+      font-size: 18px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 8px 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tic Tac Toe</h1>
+  <div class="board" id="board"></div>
+  <div id="status">Your turn (O)</div>
+  <button onclick="restartGame()">Restart Game</button>
+
+  <script>
+    const board = document.getElementById("board");
+    const statusText = document.getElementById("status");
+    let cells = Array(9).fill("");
+    let gameActive = true;
+
+    function renderBoard() {
+      board.innerHTML = "";
+      cells.forEach((cell, index) => {
+        const div = document.createElement("div");
+        div.className = "cell";
+        div.textContent = cell;
+        div.onclick = () => playerMove(index);
+        board.appendChild(div);
+      });
+    }
+
+    function checkWinner() {
+      const winPatterns = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      for (let pattern of winPatterns) {
+        const [a, b, c] = pattern;
+        if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
+          return cells[a];
+        }
+      }
+      return cells.includes("") ? null : "Draw";
+    }
+
+    function playerMove(index) {
+      if (!gameActive || cells[index]) return;
+
+      cells[index] = "O";
+      renderBoard();
+      let result = checkWinner();
+      if (result) return endGame(result);
+
+      statusText.textContent = "Computer's turn (X)";
+      setTimeout(computerMove, 500);
+    }
+
+    function computerMove() {
+      if (!gameActive) return;
+
+      let emptyIndices = cells.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+      if (emptyIndices.length === 0) return;
+
+      // Simple random move (can be upgraded to smart AI)
+      const move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      cells[move] = "X";
+
+      renderBoard();
+      let result = checkWinner();
+      if (result) return endGame(result);
+
+      statusText.textContent = "Your turn (O)";
+    }
+
+    function endGame(winner) {
+      gameActive = false;
+      statusText.textContent = winner === "Draw" ? "It's a draw!" : `${winner} wins!`;
+    }
+
+    function restartGame() {
+      cells = Array(9).fill("");
+      gameActive = true;
+      statusText.textContent = "Your turn (O)";
+      renderBoard();
+    }
+
+    renderBoard();
+  </script>
+
+</body>
+</html>
